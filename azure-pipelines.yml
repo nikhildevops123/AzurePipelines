@@ -1,0 +1,40 @@
+# ASP.NET
+# Build and test ASP.NET projects.
+# Add steps that publish symbols, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  # buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  connectionname: 'SeethaConn1'
+  myappname: 'mytestapp15054'
+
+
+steps:
+- script: echo Hello Nikhil
+  displayName: say Hello 
+
+- script: dotnet clean --configuration Release
+  displayName: cleaning-code
+  
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: build-script 
+
+- script: dotnet publish --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)
+  displayName: publish-script
+  
+- task: AzureRmWebAppDeployment@4
+  inputs:
+    ConnectionType: 'AzureRM'
+    azureSubscription: '$(connectionname)'
+    appType: 'webApp'
+    WebAppName: '$(myappname)'
+    # packageForLinux: '$(Build.ArtifactStagingDirectory)/**/*.zip'
+    packageForLinux: '$(Build.ArtifactStagingDirectory)'
